@@ -1,0 +1,19 @@
+###########################################################################
+#			Fabricio Torrico Barahona			  #
+###########################################################################
+#
+#	docker-compose que implementa:
+#		* Ubuntu 20.04
+#
+#	Nota: Funcional y usado para pruebas de CIS Control
+#
+###########################################################################
+version: "3"
+services:
+
+ # Ubuntu 20.04
+ ubuntu20.04-test1: 
+    build: dockerfiles/ubuntu/
+    tty: true 
+    volumes: 
+      - /home/fabri/Documents/docker/TFM/srv-ubuntu20.04/datos-persistentes:/home/

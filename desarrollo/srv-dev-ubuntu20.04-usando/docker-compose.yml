@@ -1,0 +1,85 @@
+###########################################################################
+#			Fabricio Torrico Barahona			  #
+###########################################################################
+#
+#	docker-compose que implementa:
+#		* php
+#		* apache
+#		* mysl
+#		* phpmyadmin
+#       En Ubuntu 20.04
+#
+#	Nota: Funcional y usado para desarrollo
+#
+###########################################################################
+version: "3"
+services:
+
+ # PHP y Apache 
+ php-apache: 
+    build: dockerfiles/ubuntu-php-apache/
+    tty: true 
+    links: 
+      - db-mysql:db-mysql 
+    volumes: 
+      - /media/fabri/DATA/Laboral/desarrollo:/var/www/html
+      - /home/fabri/Documents/docker/desarrollo/apache-datos-persistentes:/etc/apache2/sites-available
+    ports:
+      - "80:80"
+      - "443:443"
+
+ # Base de datos MySQL
+ db-mysql:
+   image: mysql
+   command: --default-authentication-plugin=mysql_native_password
+   restart: always
+   # Para publicar el puerto 3306, por defecto accedemos a traves de phpmyadmin
+   #   ports:
+   #     - "3306:3306"
+   environment:
+     MYSQL_ROOT_PASSWORD: fabri
+     MYSQL_USER: fabri
+     MYSQL_PASSWORD: fabri
+   volumes:
+      - ../mysql-datos-persistentes:/var/lib/mysql
+
+ # PhpMyAdmin
+ phpmyadmin:
+   image: phpmyadmin
+   #container_name: phpmyadmin
+   restart: always
+   links: 
+     - db-mysql:db-mysql
+   ports:
+     - 8080:80
+   environment:
+     - PMA_HOST=db-mysql
+     # Phpmyadmin para servidor arbitrario (Apuntar a una IP puerto 3306)
+     #     - PMA_ARBITRARY=1
+     - UPLOAD_LIMIT=10M
+
+
+# Postgres con postgis
+ postgis-docker:
+   image: cmihai/postgis
+   container_name: postgis-docker
+   restart: always
+   ports:
+     - 5432:5432
+   environment:
+     - POSTGRES_PASSWORD=fabri
+   volumes:
+      - ../postgresql-datos-persistentes:/var/lib/mysql
+
+# Pgadmin
+ pgadmin4-docker:
+   image: dpage/pgadmin4
+   container_name: pgadmin4-docker
+   restart: always
+   ports:
+     - 5050:80
+   environment:
+     - PGADMIN_DEFAULT_EMAIL=fabri@gmail.com
+     - PGADMIN_DEFAULT_PASSWORD=fabri
+   links:
+      - postgis-docker
